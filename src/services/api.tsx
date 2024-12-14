@@ -1,5 +1,4 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 const URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export interface UserType {
@@ -29,8 +28,6 @@ export const login = async ({ username, password }: UserType) => {
       username,
       password,
     });
-
-    Cookies.set("auth_token", response.data.token, { expires: 365 });
 
     return response.data;
   } catch (error) {

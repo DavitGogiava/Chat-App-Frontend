@@ -1,34 +1,34 @@
 "use client";
 import { useState } from "react";
-import { login } from "@/services/api";
-import axios from "axios";
-import Cookies from "js-cookie";
-
+import { login } from "@/actions/user";
+import { setCookie } from "cookies-next";
+import { getNextYearAsDate } from "@/lib/date";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const response = await login({ username, password });
-      setMessage("User logged in successfully");
-      console.log(response);
-      Cookies.set("auth_token", response.access_token, { expires: 365 });
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setMessage(`Error: ${error.response?.data.message || "Unknown error"}`);
+      const response = await login({ username: username, password: password });
+
+      if (response?.status === "success") {
+        console.log("Login successful:", response.message);
+        setCookie("auth_token", response?.data?.access_token, {
+          expires: getNextYearAsDate(),
+        });
       } else {
-        setMessage("An unexpected error occurred");
+        console.error("Login failed:", response?.message);
       }
+    } catch (error) {
+      console.error("An unexpected error occurred:", error);
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-10">
       <h2 className="text-2xl font-bold mb-5">Login</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleLogin}>
         <div className="mb-4">
           <label className="block text-gray-700">Username</label>
           <input
@@ -54,7 +54,6 @@ const Login = () => {
           Login
         </button>
       </form>
-      {message && <p className="mt-4">{message}</p>}
     </div>
   );
 };
